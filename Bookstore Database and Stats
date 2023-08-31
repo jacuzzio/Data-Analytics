@@ -1,0 +1,27 @@
+
+
+CREATE TABLE books (id INTEGER PRIMARY KEY, name TEXT, author_first TEXT, author_last TEXT, price INTEGER);
+
+INSERT INTO books VALUES (1, "frankenstien","mary","shelley", 5);
+INSERT INTO books VALUES (2, "dune","frank","herbert", 5);
+INSERT INTO books VALUES (3, "lord of the rings","john","tolkien",3);
+INSERT INTO books VALUES (4, "old man and the sea","ernest","hemmingway",10);
+INSERT INTO books VALUES (5, "harry potter sorcerers stone","joanne","rowling",1);
+INSERT INTO books VALUES (6, "harry potter chamber of secrets","joanne","rowling",1);
+INSERT INTO books VALUES (7, "harry potter prisoner of azkaban","joanne","rowling",3);
+INSERT INTO books VALUES (8, "harry potter goblet of fire","joanne","rowling",3);
+INSERT INTO books VALUES (9, "harry potter order of the pheonix","joanne","rowling",4);
+INSERT INTO books VALUES (10, "harry potter half blood prince","joanne","rowling",2);
+INSERT INTO books VALUES (11, "harry potter deathly hallows 1","joanne","rowling",1);
+INSERT INTO books VALUES (12, "harry potter deathly hallows 2","joanne","rowling",4);
+INSERT INTO books VALUES (13, "omnivours dilemma","michael","pollan",1);
+INSERT INTO books VALUES (14, "goosebumps","robert","stine",30);
+INSERT INTO books VALUES (15, "this is it","david","lynch",2);
+
+SELECT * from books ORDER BY price DESC;
+
+
+SELECT author_first, COUNT(*) FROM books GROUP BY author_first;
+
+
+
