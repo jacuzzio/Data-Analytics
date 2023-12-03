@@ -67,3 +67,44 @@ SELECT Product, SUM(Quantity)
 FROM BIT_DB.FebSales
 WHERE location LIKE '%Los Angeles%'
 GROUP BY Product;
+
+/*Which locations in New York received at least 3 orders in January, 
+and how many orders did they each receive?*/
+SELECT location, COUNT(orderID) AS total_orders
+FROM BIT_DB.JanSales
+WHERE location <> ''
+    AND location <> 'Purchase Address'
+GROUP BY location
+    HAVING COUNT(orderID) >= 3;
+
+/*How many of each type of headphone were sold in February?*/
+SELECT Product, SUM(Quantity) AS total_sold
+FROM BIT_DB.FebSales
+WHERE Product LIKE '%headphone%'
+GROUP BY Product;
+
+/*What was the average amount spent per account in February? */
+SELECT ROUND(AVG(total_spent), 2) AS avg_total_spent  
+FROM
+    (SELECT cust.acctnum, SUM(feb.price) AS total_spent
+    FROM BIT_DB.Febsales feb
+    JOIN BIT_DB.customers cust ON cust.order_id = feb.orderID
+    GROUP BY cust.acctnum)
+AS avg_by_acct;
+
+/*What was the average quantity of products purchased per account in February? 
+(we want the overall average, not the average for each account individually).*/
+SELECT ROUND(AVG(total_qty),1) AS avg_total_qty
+FROM
+    (SELECT cust.acctnum, SUM(feb.Quantity) AS total_qty
+    FROM BIT_DB.FebSales feb
+    JOIN BIT_DB.customers cust ON cust.order_id = feb.orderID
+    GROUP BY cust.acctnum)
+AS avg_qty_per_acct;
+
+/*Which product brought in the most revenue in January and how much revenue did it bring in total?*/
+SELECT Product AS bestselling_product, ROUND(SUM(price), 2) AS total_revenue
+FROM BIT_DB.JanSales
+GROUP BY Product
+ORDER BY SUM(price) DESC
+LIMIT 1;
