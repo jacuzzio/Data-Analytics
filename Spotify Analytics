@@ -1,0 +1,252 @@
+/* I pulled a dataset for Spotify's Top 50 Songs of 2021 from kaggle.
+  Then created a table to run some queries using SQL */
+
+/* Create a table and instert the csv */
+
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+song_key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+song_mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness decimal(8,7) NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL )
+
+/* Queries */
+
+/*What is the average danceability by artist*/
+
+SELECT 
+    artist_name, 
+    track_name, 
+    ROUND(AVG(danceability), 3) AS avg_danceability 
+FROM 
+    BIT_DB.Spotifydata
+GROUP BY 
+    artist_name 
+ORDER BY 
+    avg_danceability DESC;
+
+/*What is the average danceability ? */
+SELECT 
+    ROUND(AVG(danceability), 3) AS avg_danceability
+FROM 
+    BIT_DB.Spotifydata;
+
+/*Who are the top 10 artists based on popularity? */
+SELECT
+    artist_name AS artist, 
+    popularity
+FROM 
+    BIT_DB.Spotifydata
+ORDER BY 
+    popularity DESC
+LIMIT
+    10;
+/*What artist released the longest song? */
+SELECT
+    artist_name AS artist,
+    MAX(duration_ms) AS longest_song_ms
+FROM
+    BIT_DB.Spotifydata; 
+    
+/*What's the average danceability for the 10 most popular songs? */
+
+SELECT 
+    AVG(danceability) AS avg_danceability
+FROM 
+(
+    SELECT 
+        danceability
+    FROM
+        Spotifydata
+    ORDER BY
+        popularity DESC
+    LIMIT
+        10    
+);
+
+/*What is the most common time signature for popular tracks (popularity > 90)*/
+
+SELECT 
+    time_signature, 
+    COUNT(*) AS track_qty
+FROM 
+    BIT_DB.Spotifydata
+WHERE 
+    popularity >= 90
+GROUP BY
+    time_signature
+ORDER BY
+    track_qty DESC;
+    
+/* Data exploration - What are the top 10 tracks based on popularity? */
+
+SELECT
+    track_name,
+    artist_name,
+    popularity
+FROM
+    BIT_DB.Spotifydata
+ORDER BY
+    popularity DESC
+LIMIT 
+    10;
+    
+
+/* Data exploration - What is the average danceability and energy for all tracks? */
+
+SELECT
+    ROUND(AVG(danceability), 2) AS avg_danceability,
+    ROUND(AVG(energy), 2) AS avg_energy
+FROM
+    BIT_DB.Spotifydata;
+    
+-- Data Filtering - Select tracks with popularity > 90 
+
+SELECT
+    track_name,
+    artist_name,
+    popularity
+FROM
+    BIT_DB.Spotifydata
+WHERE 
+    popularity >= 90
+ORDER BY
+    popularity DESC;
+    
+-- Data Filtering - Retrieve tracks with high danceabiliry and low acousticness
+
+SELECT
+    track_name,
+    artist_name,
+    danceability,
+    acousticness
+FROM
+    BIT_DB.Spotifydata
+WHERE
+    --danceability and acousiticness are measured between 0 and 1
+    danceability >= .75
+    AND acousticness <= .25
+ORDER BY 
+    danceability DESC;
+    
+-- Aggregation and Grouping - Calculate the average popularity by artist
+
+SELECT
+    artist_name,
+    AVG(popularity) AS avg_popularity
+FROM
+    BIT_DB.Spotifydata
+GROUP BY 
+    artist_name
+ORDER BY
+    avg_popularity DESC;
+    
+-- Aggregation and Grouping - Find max and min danceability for each time signature
+
+SELECT
+    time_signature,
+    MAX(danceability) AS max_danceability,
+    MIN(danceability) AS min_danceability   
+FROM
+    BIT_DB.Spotifydata
+GROUP BY 
+    time_signature;
+    
+-- Sorting and Limiting - Show top 5 Artists with most tracks on the Top 50 list.
+
+SELECT
+    artist_name,
+    Count(*) AS total_tracks
+FROM
+    BIT_DB.Spotifydata
+GROUP BY
+    artist_name
+ORDER BY 
+    total_tracks DESC
+LIMIT 
+    5;
+    
+-- Sorting and Limiting - Show the 15 least popular tracks
+
+SELECT
+    track_name,
+    artist_name,
+    popularity
+FROM
+    BIT_DB.Spotifydata
+ORDER BY
+    popularity ASC
+LIMIT 
+    15;
+    
+-- Pattern Identification - Find tracks with high danceability but low energy.
+-- Assume high danceability >= .7 and low energy <= .5
+
+SELECT
+    track_name,
+    artist_name,
+    danceability,
+    energy
+FROM 
+    BIT_DB.Spotifydata
+WHERE
+    danceability >= .7
+    AND energy <= .5;
+    
+-- Pattern Identificaiton - Find tracks with high valence and low speechiness.
+-- Assume high valence >= .7 and low speechiness <= .3
+
+SELECT 
+    track_name,
+    artist_name,
+    valence,
+    speechiness
+FROM
+    BIT_DB.Spotifydata 
+WHERE
+    valence >= .7
+    AND speechiness <= .3;
+    
+-- Conditional Statements - Identify track tempo as Slow/Medium/Fast
+
+SELECT
+    track_name,
+    artist_name,
+    tempo,
+    CASE
+        WHEN tempo < 100 THEN 'Slow'
+        WHEN tempo >= 100 AND  tempo < 150 THEN 'Medium'
+        ELSE 'Fast'
+    END AS speed
+FROM
+    BIT_DB.Spotifydata;
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
