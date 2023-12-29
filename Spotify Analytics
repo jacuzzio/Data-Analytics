@@ -233,6 +233,34 @@ SELECT
     END AS speed
 FROM
     BIT_DB.Spotifydata;
+
+/* CTE Practice
+Calculate the average popularity for the artists in the Spotify data table. 
+Then, for every artist with an average popularity of 90 or above, show their name, 
+their average popularity, and label them as a “Top Star”.*/
+
+WITH 
+    top_artists AS
+(
+    SELECT 
+        artist_name,
+        ROUND(AVG(popularity), 2) AS avg_popularity
+    FROM
+        Spotifydata
+    GROUP BY
+        artist_name
+)
+SELECT
+    artist_name,
+    avg_popularity,
+    CASE
+        WHEN avg_popularity >= 90 THEN 'Top Star!'
+        ELSE ' '
+    END AS rating
+FROM
+    top_artists;
+    
+
     
 
     
