@@ -1,0 +1,178 @@
+/* This is a series of queries I ran on a database I downloaded for a digital media store*/
+
+--Sales analysis
+--Calculate sales for each customer
+
+SELECT
+    customers.FirstName,
+    customers.LastName,
+    SUM(invoices.Total) AS TotalSales
+FROM 
+    chinook.customers
+JOIN 
+    chinook.invoices
+    ON customers.CustomerId = invoices.CustomerId
+GROUP BY 
+    customers.CustomerId
+ORDER BY
+    TotalSales DESC; 
+    
+--Identify top selling genres or artists
+
+--generate of list of top 10 genres and total sales
+SELECT
+    genres.Name AS '10 Bestselling Genres',
+    SUM(invoice_items.Quantity) AS total_quantity,
+    ROUND(SUM(invoice_items.UnitPrice * invoice_items.Quantity), 2) AS total_sales
+FROM
+    genres
+LEFT JOIN
+    tracks ON tracks.GenreId = genres.GenreId
+LEFT JOIN
+    invoice_items ON  invoice_items.TrackId = tracks.TrackId
+GROUP BY
+    genres.Name
+ORDER BY 
+    total_sales DESC
+LIMIT
+    10;   
+ 
+-- Generate list of 10 bestselling artist
+
+SELECT
+    a.name AS '10 Bestselling Artists',
+    ROUND(SUM(ii.Quantity * ii.UnitPrice), 2) AS TotalSales
+FROM 
+    artists a
+LEFT JOIN
+    albums alb ON alb.ArtistId = a.ArtistId
+LEFT JOIN
+    tracks t ON t.AlbumId = alb.AlbumId
+LEFT JOIN
+    invoice_items ii ON ii.TrackId = t.TrackId
+GROUP BY
+    a.Name
+ORDER BY
+    TotalSales DESC
+LIMIT
+    10;
+
+-- Employee Heirarchy
+-- Create a hierarchical structure of employees based on the ReportsTo field.
+
+WITH recursiveHeirarchy AS
+(
+    SELECT
+        employees.EmployeeId,
+        employees.FirstName,
+        employees.LastName,
+        employees.ReportsTo,
+        NULL AS Supervisor,
+        0 AS Level -- Set as anchor employee
+    FROM
+        employees
+    WHERE
+        ReportsTO IS NULL 
+    
+    UNION ALL
+    
+    SELECT
+        employees.EmployeeId,
+        employees.FirstName,
+        employees.LastName,
+        employees.ReportsTo,
+        recursiveHeirarchy.Firstname || ' ' || recursiveHeirarchy.Lastname AS Supervisor,
+        recursiveHeirarchy.Level +1 AS Level --increment level
+    FROM
+        employees
+    JOIN
+        recursiveHeirarchy ON employees.ReportsTo = recursiveHeirarchy.EmployeeId
+)
+
+SELECT
+    EmployeeId,
+    FirstName,
+    LastName,
+    Supervisor,
+    Level
+FROM
+    recursiveHeirarchy
+ORDER BY 
+    Level;
+    
+-- Playlist analysis
+-- Find playlist with the most tracks
+
+SELECT
+    playlists.Name,
+    COUNT(playlist_track.TrackId) AS TotalTracks
+FROM
+    playlists
+LEFT JOIN
+    playlist_track ON playlist_track.PlaylistId = playlists.PlaylistId
+GROUP BY
+    playlists.Name
+ORDER BY
+    TotalTracks DESC;
+    
+--Find the most popular songs in the playlists
+
+SELECT
+    tracks.Name,
+    COUNT (playlist_track.TrackId) AS TotalPlaylists
+FROM
+    tracks
+LEFT JOIN 
+    playlist_track ON playlist_track.TrackId = tracks.TrackId
+GROUP BY 
+    tracks.Name
+ORDER BY
+    TotalPlaylists;
+
+-- Artist Discography
+-- List all albums for the artist with total tracks for each album
+
+SELECT
+    artists.ArtistId,
+    artists.Name,
+    albums.Title,
+    COUNT(tracks.TrackId) AS TotalTracks
+FROM
+    artists
+JOIN  --ignore artists without albums
+    albums ON albums.ArtistId = artists.ArtistId
+LEFT JOIN
+    tracks ON tracks.AlbumId = albums.AlbumId
+GROUP BY
+    albums.Title
+ORDER BY 
+    artists.Name;
+
+--Identify high spending customers
+
+SELECT
+    customers.FirstName || ' ' || customers.LastName AS Customer,
+    COUNT(invoices.InvoiceId) AS TotalOrders,
+    SUM(invoices.Total) AS TotalSpent
+FROM
+    customers
+JOIN
+    invoices ON invoices.CustomerId = customers.CustomerId
+GROUP BY 
+    customers.CustomerId
+HAVING
+    TotalSpent >= 40 --assume $40 is the threshold for high spending
+ORDER BY
+    TotalSpent DESC;
+    
+--Find periods with most sales
+
+SELECT
+    strftime('%m-%Y', InvoiceDate) AS Month,
+    ROUND(SUM(Total), 2) AS TotalSales     
+FROM
+    invoices
+GROUP BY
+    Month
+ORDER BY 
+    TotalSales DESC;
